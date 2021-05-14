@@ -24,7 +24,7 @@ def generate_linear(sample_size=500):
     m = np.random.multivariate_normal(means, covs, sample_size)
     return m.astype('float32')
 
-def gaussian_mixture(sample_size, n_dim=2, n_labels=2, x_var=0.5, y_var=0.1, label_indices=None):
+def gaussian_mixture(sample_size, n_dim=2, n_labels=2, x_var=0.5, y_var=0.1, label_indices=None, condition=False):
     if n_dim != 2:
         raise Exception("n_dim must be 2.")
 
@@ -35,15 +35,24 @@ def gaussian_mixture(sample_size, n_dim=2, n_labels=2, x_var=0.5, y_var=0.1, lab
         new_y = x * sin(r) + y * cos(r)
         new_x += shift * cos(r)
         new_y += shift * sin(r)
-        return np.array([new_x, new_y, label]).reshape((3,))
+        if condition:
+            return np.array([new_x, new_y, label]).reshape((3,))
+        else:
+            return np.array([new_x, new_y]).reshape((2,))
 
     x = np.random.normal(0, x_var, (sample_size, (int)(n_dim/2)))
     y = np.random.normal(0, y_var, (sample_size, (int)(n_dim/2)))
-    z = np.empty((sample_size, n_dim+1), dtype=np.float32)
+    if condition:
+        z = np.empty((sample_size, n_dim+1), dtype=np.float32)
+    else:
+        z = np.empty((sample_size, n_dim), dtype=np.float32)
     for batch in range(sample_size):
         for zi in range((int)(n_dim/2)):
             if label_indices is not None:
                 z[batch, zi*2:zi*2+2] = sample(x[batch, zi], y[batch, zi], label_indices[batch], n_labels)
             else:
-                z[batch, 0:3] = sample(x[batch, zi], y[batch, zi], np.random.randint(0, n_labels), n_labels)
+                if condition:
+                    z[batch, 0:3] = sample(x[batch, zi], y[batch, zi], np.random.randint(0, n_labels), n_labels)
+                else:
+                    z[batch, 0:2] = sample(x[batch, zi], y[batch, zi], np.random.randint(0, n_labels), n_labels)
     return z
