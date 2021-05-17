@@ -1,6 +1,6 @@
 # vae_with_toy_example
 
-Play with 2D dataset with GAN, VAE, CVAE
+Play with 2D dataset with GAN, VAE, CVAE, CVAE-GAN
 
 - Ring Distribution with GAN
 
